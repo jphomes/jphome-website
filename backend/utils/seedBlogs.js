@@ -111,7 +111,9 @@ For investors, gross yields around 3–3.5% remain common in quality stock. The 
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const { resolveMongoUri } = require("./mongoUri");
+    const mongo = resolveMongoUri();
+    await mongoose.connect(mongo.uri);
 
     const existing = await Blog.countDocuments();
     if (existing > 0) {

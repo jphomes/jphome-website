@@ -1,16 +1,12 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../hooks/useAuth.js";
 
 export default function ProtectedRoute({ children }) {
-  const { admin, loading } = useAuth();
+  const { admin, token, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-charcoal text-stone font-mono text-sm tracking-widest2">
-        LOADING…
-      </div>
-    );
+  if (loading || (token && !admin)) {
+    return <div className="admin-loading">Preparing studio…</div>;
   }
 
   if (!admin) return <Navigate to="/admin/login" replace />;

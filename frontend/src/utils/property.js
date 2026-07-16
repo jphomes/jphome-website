@@ -1,7 +1,21 @@
+/** Ensure display strings start with the Indian rupee sign. */
+export function withRupee(value) {
+  if (value == null || value === "") return "";
+  const text = String(value).trim();
+  if (!text) return "";
+  if (text.includes("₹")) return text;
+  // Normalise Rs / INR prefixes to ₹
+  const stripped = text.replace(/^(rs\.?|inr)\s*/i, "");
+  return `₹${stripped}`;
+}
+
 export function formatPrice(property) {
   if (!property) return "";
-  if (property.priceLabel) return property.priceLabel;
-  const p = property.price;
+  if (property.priceLabel) return withRupee(property.priceLabel);
+
+  const p = Number(property.price);
+  if (!Number.isFinite(p) || p <= 0) return "Price on request";
+
   if (p >= 10000000) return `₹${(p / 10000000).toFixed(2)} Cr`;
   if (p >= 100000) return `₹${(p / 100000).toFixed(1)} L`;
   return `₹${p.toLocaleString("en-IN")}`;

@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { FiDownload, FiMapPin } from "react-icons/fi";
 import api from "../api/axios.js";
 import PropertyCard from "../components/PropertyCard.jsx";
 import WhatsAppButton from "../components/WhatsAppButton.jsx";
 import WhatsAppPreview from "../components/WhatsAppPreview.jsx";
-import { formatPrice, formatLocation, formatSpecs } from "../utils/property.js";
+import YoutubeEmbed from "../components/YoutubeEmbed.jsx";
+import PropertyGallery from "../components/PropertyGallery.jsx";
+import { formatPrice, formatLocation } from "../utils/property.js";
 import { buildPropertyWhatsAppMessage } from "../utils/whatsapp.js";
+import { getYoutubeEmbedUrl } from "../utils/youtube.js";
+import { downloadBrochure, getBrochureDownloadApiUrl, getBrochureUrl } from "../utils/brochure.js";
 
 const DISTRICT = import.meta.env.VITE_DISTRICT_NAME || "Raipur";
 
@@ -13,13 +18,11 @@ export default function PropertyDetail() {
   const { slug } = useParams();
   const [property, setProperty] = useState(null);
   const [related, setRelated] = useState([]);
-  const [activeImage, setActiveImage] = useState(0);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     setProperty(null);
     setNotFound(false);
-    setActiveImage(0);
     api
       .get(`/properties/${slug}`)
       .then((res) => {
@@ -42,44 +45,69 @@ export default function PropertyDetail() {
     return <div className="py-16 text-center text-sm text-ink/40">Loading…</div>;
   }
 
-  const { title, images, coverImage, location, specs, status, propertyType, description, amenities, reraApproved, reraNumber } = property;
+  const {
+    title,
+    images,
+    coverImage,
+    location,
+    specs,
+    status,
+    propertyType,
+    description,
+    amenities,
+    nearbyLandmarks,
+    brochureUrl,
+    reraApproved,
+    reraNumber,
+    youtubeUrl,
+  } = property;
   const gallery = images?.length ? images : [coverImage];
   const whatsappMessage = buildPropertyWhatsAppMessage(property);
+  const landmarks = (nearbyLandmarks || []).filter((l) => l?.name);
+  const brochureHref = getBrochureUrl(brochureUrl);
+  const brochureApiUrl = getBrochureDownloadApiUrl(slug);
+
+  const handleBrochureDownload = (e) => {
+    e.preventDefault();
+    const safeName = `${(title || "brochure").replace(/[^\w\-]+/g, "_").slice(0, 40)}.pdf`;
+    // Prefer backend proxy — Cloudinary image/upload + fl_attachment returns HTTP 400
+    downloadBrochure(brochureApiUrl || brochureHref, safeName);
+  };
 
   return (
     <div className="pb-24 md:pb-8">
       <div className="page-wrap pt-4 md:pt-8">
-        <div className="relative detail-hero-img rounded-2xl md:rounded-xl overflow-hidden h-56 md:h-96 mb-4">
-          <img src={gallery[activeImage]} alt={title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
-          <div className="absolute bottom-4 left-4 right-4">
-            <div className="flex gap-2 mb-2">
+        <PropertyGallery
+          images={gallery}
+          title={title}
+          badges={
+            <div className="flex gap-2 mb-2 flex-wrap">
               <span className="badge-brass">{status}</span>
               <span className="badge-muted">{propertyType}</span>
               {reraApproved && <span className="rera-badge">RERA Approved</span>}
             </div>
-            <h1 className="text-white text-xl md:text-3xl font-semibold leading-tight">{title}</h1>
-          </div>
-        </div>
+          }
+          overlayTitle={<h1 className="text-white text-xl md:text-3xl font-semibold leading-tight">{title}</h1>}
+        />
 
-        {gallery.length > 1 && (
-          <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar">
-            {gallery.map((img, i) => (
-              <button
-                key={img + i}
-                type="button"
-                onClick={() => setActiveImage(i)}
-                className={`shrink-0 w-16 h-12 md:w-24 md:h-16 rounded-lg overflow-hidden border-2 ${
-                  i === activeImage ? "border-leaf" : "border-transparent opacity-60"
-                }`}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
+        {brochureHref && (
+          <button
+            type="button"
+            onClick={handleBrochureDownload}
+            className="brochure-download-btn"
+          >
+            <span className="brochure-download-icon">
+              <FiDownload size={20} />
+            </span>
+            <span className="brochure-download-copy">
+              <strong>Download brochure</strong>
+              <em>PDF · project details & layout</em>
+            </span>
+            <span className="brochure-download-cta">Get PDF</span>
+          </button>
         )}
 
-        <div className="detail-layout">
+        <div className="detail-layout mt-6">
           <div className="space-y-6">
             {reraNumber && (
               <p className="text-xs text-muted">RERA: <span className="font-mono text-primary">{reraNumber}</span></p>
@@ -121,14 +149,30 @@ export default function PropertyDetail() {
                 </div>
               </div>
             )}
+
+            {landmarks.length > 0 && (
+              <div>
+                <h2 className="section-title">Nearby landmarks</h2>
+                <ul className="landmark-list">
+                  {landmarks.map((l) => (
+                    <li key={`${l.name}-${l.distance || ""}`} className="landmark-item">
+                      <FiMapPin className="landmark-icon" size={16} />
+                      <span className="landmark-name">{l.name}</span>
+                      {l.distance ? <span className="landmark-distance">{l.distance}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {getYoutubeEmbedUrl(youtubeUrl) && (
+              <YoutubeEmbed url={youtubeUrl} title={`${title} video tour`} />
+            )}
           </div>
 
           <aside id="enquire" className="scroll-mt-28">
             <div className="sidebar-panel bg-mint/40 md:sticky md:top-24">
               <h2 className="section-title !mb-2">Enquire on WhatsApp</h2>
-              <p className="text-xs text-ink/55 mb-3">
-                Pre-filled with this property's details — {formatSpecs(specs)}
-              </p>
               <WhatsAppPreview message={whatsappMessage} />
               <div className="mt-4">
                 <WhatsAppButton message={whatsappMessage} label="Enquire on WhatsApp" fullWidth />
@@ -140,7 +184,8 @@ export default function PropertyDetail() {
 
       {related.length > 0 && (
         <div className="page-wrap mt-8 md:mt-12 pb-4">
-          <h2 className="section-title">Similar Projects</h2>
+          <h2 className="section-title">Similar {propertyType} projects</h2>
+          <p className="text-sm text-muted mb-4 -mt-2">Matching type: {propertyType}</p>
           <div className="properties-grid space-y-3">
             {related.slice(0, 3).map((p) => <PropertyCard key={p._id} property={p} />)}
           </div>

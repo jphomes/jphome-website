@@ -82,7 +82,9 @@ const JP_PROJECTS = [
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const { resolveMongoUri } = require("./mongoUri");
+    const mongo = resolveMongoUri();
+    await mongoose.connect(mongo.uri);
     const count = await Property.countDocuments();
     if (count > 0) {
       console.log(`Database has ${count} properties. Run with FORCE_SEED=1 to replace.`);

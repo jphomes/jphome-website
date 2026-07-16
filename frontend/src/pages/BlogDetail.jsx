@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios.js";
+import BlogMarkdown from "../utils/blogMarkdown.jsx";
 
 export default function BlogDetail() {
   const { slug } = useParams();
@@ -11,11 +12,14 @@ export default function BlogDetail() {
   useEffect(() => {
     setBlog(null);
     setNotFound(false);
+    setRecent([]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     api
       .get(`/blogs/${slug}`)
       .then((res) => {
         setBlog(res.data.blog);
-        setRecent(res.data.recent);
+        setRecent(res.data.recent || []);
       })
       .catch(() => setNotFound(true));
   }, [slug]);
@@ -50,11 +54,7 @@ export default function BlogDetail() {
           {blog.author} · {date} · {blog.readTimeMinutes} min read
         </p>
 
-        <div className="text-sm md:text-base text-ink/75 leading-relaxed mt-5 md:mt-8 space-y-4">
-          {blog.content.split("\n\n").map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
+        <BlogMarkdown content={blog.content} />
 
         {blog.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-6">
@@ -65,20 +65,47 @@ export default function BlogDetail() {
         )}
       </article>
 
-      {recent.length > 0 && (
-        <section className="page-wrap pb-4 max-w-3xl">
-          <h2 className="section-title">More Articles</h2>
+      <section className="page-wrap pb-8 max-w-3xl">
+        <div className="flex items-end justify-between gap-3 mb-4">
+          <h2 className="section-title mb-0">More Articles</h2>
+          <Link to="/blogs" className="text-sm font-medium text-leaf hover:text-forest shrink-0">
+            View all →
+          </Link>
+        </div>
+
+        {recent.length === 0 ? (
+          <p className="text-sm text-ink/50">No other published articles yet.</p>
+        ) : (
           <ul className="space-y-3">
-            {recent.map((r) => (
-              <li key={r._id}>
-                <Link to={`/blog/${r.slug}`} className="block bg-white rounded-xl p-3.5 border border-sage/30 text-sm font-medium text-forest hover:border-leaf transition-colors">
-                  {r.title} →
-                </Link>
-              </li>
-            ))}
+            {recent.map((r) => {
+              const rDate = new Date(r.createdAt).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              });
+              return (
+                <li key={r._id}>
+                  <Link
+                    to={`/blogs/${r.slug}`}
+                    className="more-article-card"
+                  >
+                    {r.coverImage ? (
+                      <img src={r.coverImage} alt="" className="more-article-thumb" />
+                    ) : (
+                      <div className="more-article-thumb more-article-thumb--empty" />
+                    )}
+                    <div className="more-article-copy min-w-0">
+                      <p className="more-article-date">{rDate}</p>
+                      <p className="more-article-title">{r.title}</p>
+                    </div>
+                    <span className="more-article-arrow" aria-hidden>→</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 }

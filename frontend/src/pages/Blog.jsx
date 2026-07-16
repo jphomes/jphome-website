@@ -30,7 +30,7 @@ export default function Blog() {
     <div className="page-wrap py-4 md:py-8">
       <div className="mb-5">
         <h2 className="text-lg font-semibold text-forest">Market Journal</h2>
-        <p className="text-sm text-ink/55 mt-1">Notes on neighbourhoods, pricing & buying tips</p>
+        <p className="text-sm text-ink/55 mt-1">Notes on neighbourhoods, pricing & buying tips · newest first</p>
       </div>
 
       {loading ? (

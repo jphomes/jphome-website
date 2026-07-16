@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import WhatsAppButton from "./WhatsAppButton.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 import { buildGeneralWhatsAppMessage } from "../utils/whatsapp.js";
 import { BRAND } from "../config/brand.js";
 
 const links = [
-  { to: "/", label: "Home", end: true },
   { to: "/properties", label: "Properties" },
   { to: "/blogs", label: "Blogs" },
   { to: "/about", label: "About" },
@@ -19,8 +19,13 @@ export default function SiteNavbar() {
   return (
     <header className="site-header">
       <nav className="site-nav-inner">
-        <Link to="/" className="site-logo" onClick={() => setMenuOpen(false)}>
-          JP <span>Group</span>
+        <Link
+          to="/"
+          className="site-logo"
+          onClick={() => setMenuOpen(false)}
+          aria-label={`${BRAND.fullName} — Home`}
+        >
+          <BrandLogo variant="horizontal" className="site-logo-img" />
         </Link>
 
         <div className="site-nav-links hidden lg:flex">
@@ -28,10 +33,9 @@ export default function SiteNavbar() {
             <NavLink
               key={l.to}
               to={l.to}
-              end={l.end}
               className={({ isActive }) => `site-nav-link ${isActive ? "site-nav-link-active" : ""}`}
             >
-              {l.label}
+              <span className="site-nav-link-label">{l.label}</span>
             </NavLink>
           ))}
         </div>
@@ -45,6 +49,7 @@ export default function SiteNavbar() {
           className="lg:hidden app-header-btn"
           onClick={() => setMenuOpen((o) => !o)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           {menuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
@@ -53,7 +58,12 @@ export default function SiteNavbar() {
       {menuOpen && (
         <div className="site-mobile-menu lg:hidden">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setMenuOpen(false)} className="site-mobile-link">
+            <NavLink
+              key={l.to}
+              to={l.to}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) => `site-mobile-link ${isActive ? "site-mobile-link-active" : ""}`}
+            >
               {l.label}
             </NavLink>
           ))}

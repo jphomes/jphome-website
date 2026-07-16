@@ -13,7 +13,7 @@ import BlogDetail from "./pages/BlogDetail.jsx";
 
 import Login from "./pages/admin/Login.jsx";
 import Dashboard from "./pages/admin/Dashboard.jsx";
-import AddProperty from "./pages/admin/AddProperty.jsx";
+import PropertyFormPage from "./pages/admin/PropertyFormPage.jsx";
 import AddBlog from "./pages/admin/AddBlog.jsx";
 
 export default function App() {
@@ -25,7 +25,8 @@ export default function App() {
       <Routes>
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/admin/properties/new" element={<ProtectedRoute><AddProperty /></ProtectedRoute>} />
+        <Route path="/admin/properties/new" element={<ProtectedRoute><PropertyFormPage /></ProtectedRoute>} />
+        <Route path="/admin/properties/:id/edit" element={<ProtectedRoute><PropertyFormPage /></ProtectedRoute>} />
         <Route path="/admin/blogs/new" element={<ProtectedRoute><AddBlog /></ProtectedRoute>} />
       </Routes>
     );

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import BrandLogo from "./BrandLogo.jsx";
 import { BRAND } from "../config/brand.js";
 
 const PAGE_TITLES = {
@@ -25,8 +26,8 @@ export default function AppHeader({ title, showBack = false }) {
             </svg>
           </button>
         ) : (
-          <Link to="/" className="font-display text-lg text-primary leading-none font-semibold">
-            JP <span className="text-secondary font-medium">Group</span>
+          <Link to="/" className="app-header-logo" aria-label={BRAND.fullName}>
+            <BrandLogo variant="mark" className="app-header-logo-img" />
           </Link>
         )}
 

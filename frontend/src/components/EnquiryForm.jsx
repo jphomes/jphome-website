@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import api from "../api/axios.js";
 
+const isTenDigitPhone = (value) => /^\d{10}$/.test(value);
+
 export default function EnquiryForm({ propertyId, propertyTitle }) {
   const [form, setForm] = useState({
     name: "",
@@ -9,18 +11,43 @@ export default function EnquiryForm({ propertyId, propertyTitle }) {
     message: propertyTitle ? `I'm interested in "${propertyTitle}". Please share more details.` : "",
   });
   const [status, setStatus] = useState("idle");
+  const [phoneError, setPhoneError] = useState("");
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setForm({ ...form, phone: digits });
+      if (digits && !isTenDigitPhone(digits)) {
+        setPhoneError("Enter a valid 10-digit mobile number.");
+      } else {
+        setPhoneError("");
+      }
+      return;
+    }
+    setForm({ ...form, [name]: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isTenDigitPhone(form.phone)) {
+      setPhoneError("Enter a valid 10-digit mobile number.");
+      return;
+    }
     setStatus("sending");
+    setPhoneError("");
     try {
       await api.post("/enquiry", { ...form, propertyId });
       setStatus("sent");
       setForm({ name: "", email: "", phone: "", message: "" });
-    } catch {
-      setStatus("error");
+    } catch (err) {
+      const msg = err?.response?.data?.message;
+      if (msg && /phone|digit/i.test(msg)) {
+        setPhoneError(msg);
+        setStatus("idle");
+      } else {
+        setStatus("error");
+      }
     }
   };
 
@@ -36,7 +63,7 @@ export default function EnquiryForm({ propertyId, propertyTitle }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div>
         <label className="field-label">Name</label>
         <input required name="name" value={form.name} onChange={handleChange} className={inputClass} placeholder="Your full name" />
@@ -47,7 +74,20 @@ export default function EnquiryForm({ propertyId, propertyTitle }) {
       </div>
       <div>
         <label className="field-label">Phone</label>
-        <input required name="phone" value={form.phone} onChange={handleChange} className={inputClass} placeholder="+91 …" />
+        <input
+          required
+          name="phone"
+          type="tel"
+          inputMode="numeric"
+          pattern="\d{10}"
+          maxLength={10}
+          value={form.phone}
+          onChange={handleChange}
+          className={inputClass}
+          placeholder="10-digit mobile number"
+          aria-invalid={Boolean(phoneError)}
+        />
+        {phoneError && <p className="text-sm text-red-600 mt-1">{phoneError}</p>}
       </div>
       <div>
         <label className="field-label">Message</label>

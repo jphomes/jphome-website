@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+const { ALL_PROPERTY_TYPES } = require("../constants/propertyTypes");
 
 const PropertySchema = new mongoose.Schema(
   {
@@ -7,7 +8,7 @@ const PropertySchema = new mongoose.Schema(
     slug: { type: String, unique: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    priceLabel: { type: String }, // e.g. "On Request" overrides numeric display if set
+    priceLabel: { type: String },
     status: {
       type: String,
       enum: ["For Sale", "For Rent", "Sold", "Rented"],
@@ -15,8 +16,8 @@ const PropertySchema = new mongoose.Schema(
     },
     propertyType: {
       type: String,
-      enum: ["Apartment", "Villa", "Bungalow", "Plot", "Commercial", "Penthouse"],
-      default: "Apartment",
+      enum: ALL_PROPERTY_TYPES,
+      default: "Land Parcel",
     },
     location: {
       city: { type: String, required: true },
@@ -34,8 +35,18 @@ const PropertySchema = new mongoose.Schema(
       yearBuilt: { type: Number },
     },
     amenities: [{ type: String }],
-    images: [{ type: String, required: true }], // URLs or /uploads/ paths
+    nearbyLandmarks: [
+      {
+        name: { type: String, trim: true, required: true },
+        distance: { type: String, trim: true, default: "" },
+      },
+    ],
+    images: [{ type: String, required: true }],
+    imagePublicIds: [{ type: String }],
     coverImage: { type: String, required: true },
+    brochureUrl: { type: String, trim: true, default: "" },
+    brochurePublicId: { type: String, trim: true, default: "" },
+    youtubeUrl: { type: String, trim: true, default: "" },
     reraApproved: { type: Boolean, default: false },
     reraNumber: { type: String, trim: true },
     featured: { type: Boolean, default: false },
@@ -56,5 +67,6 @@ PropertySchema.pre("validate", function (next) {
 });
 
 PropertySchema.index({ title: "text", "location.city": "text", "location.area": "text" });
+PropertySchema.index({ propertyType: 1 });
 
 module.exports = mongoose.model("Property", PropertySchema);

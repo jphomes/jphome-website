@@ -1,15 +1,21 @@
 import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "../../hooks/useAuth.js";
+import BrandLogo from "../../components/BrandLogo.jsx";
+import { BRAND } from "../../config/brand.js";
 
 export default function Login() {
-  const { login, admin, loading } = useAuth();
+  const { login, admin, loading, token } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && admin) return <Navigate to="/admin/dashboard" replace />;
+  if (loading || (token && !admin)) {
+    return <div className="admin-loading">Preparing studio…</div>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,56 +25,71 @@ export default function Login() {
       await login(form.username, form.password);
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed.");
+      setError(err.message || "Login failed.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-charcoal flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <p className="text-brass text-xs tracking-widest2 uppercase mb-3 text-center">
-          Sondagar Estates
-        </p>
-        <h1 className="font-display text-3xl text-stone text-center mb-8">Team Login</h1>
+    <div className="admin-login">
+      <div className="admin-login-bg" aria-hidden="true" />
+      <div className="admin-login-pattern" aria-hidden="true" />
 
-        <form onSubmit={handleSubmit} className="space-y-5 bg-ink/40 border border-white/10 p-8">
-          <div>
-            <label className="text-xs tracking-widest2 uppercase text-stone/50">Username</label>
+      <Link to="/" className="admin-login-site-link">
+        ← Back to website
+      </Link>
+
+      <motion.div
+        className="admin-login-card"
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <Link to="/" className="admin-login-logo-wrap" aria-label={`${BRAND.fullName} — go to homepage`}>
+          <BrandLogo variant="square" className="admin-login-logo" />
+        </Link>
+        <p className="admin-login-eyebrow">{BRAND.fullName}</p>
+        <h1 className="admin-login-title">Team Login</h1>
+        <p className="admin-login-sub">Sign in to manage projects, journal & enquiries.</p>
+
+        <form onSubmit={handleSubmit} className="admin-login-form">
+          <div className="admin-login-field">
+            <label htmlFor="admin-username">Username</label>
             <input
+              id="admin-username"
               required
+              autoComplete="username"
+              placeholder="you@company.com"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              className="mt-1 w-full bg-transparent border-b border-white/20 focus:border-brass text-stone py-2 outline-none"
             />
           </div>
-          <div>
-            <label className="text-xs tracking-widest2 uppercase text-stone/50">Password</label>
+          <div className="admin-login-field">
+            <label htmlFor="admin-password">Password</label>
             <input
+              id="admin-password"
               required
               type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="mt-1 w-full bg-transparent border-b border-white/20 focus:border-brass text-stone py-2 outline-none"
             />
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p className="admin-error">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-brass text-charcoal text-sm tracking-widest2 uppercase py-3 hover:bg-stone transition-colors disabled:opacity-50"
-          >
-            {submitting ? "Signing in…" : "Sign In"}
+          <button type="submit" disabled={submitting} className="admin-login-submit">
+            {submitting ? "Signing in…" : "Enter studio"}
           </button>
         </form>
 
-        <p className="text-stone/30 text-xs text-center mt-6">
-          Restricted to the Sondagar Estates team.
+        <p className="admin-login-foot">
+          Restricted to the {BRAND.name} team ·{" "}
+          <Link to="/" className="admin-login-foot-link">Visit site</Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

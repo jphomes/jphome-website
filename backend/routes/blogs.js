@@ -1,35 +1,44 @@
 const express = require("express");
 const Blog = require("../models/Blog");
 const requireAdmin = require("../middleware/auth");
+const { parsePagination, paginationMeta } = require("../utils/pagination");
 
 const router = express.Router();
 
-// GET /api/blogs — public, published only, paginated
+// GET /api/blogs — public, published only, paginated (newest first)
 router.get("/", async (req, res) => {
   try {
-    const { page = 1, limit = 6, category, q } = req.query;
+    const { category, q } = req.query;
+    const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 6, maxLimit: 50 });
     const filter = { published: true };
     if (category) filter.category = category;
     if (q) filter.title = new RegExp(q, "i");
 
-    const skip = (Number(page) - 1) * Number(limit);
     const [blogs, total] = await Promise.all([
-      Blog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      Blog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Blog.countDocuments(filter),
     ]);
 
-    res.json({ blogs, total, page: Number(page), totalPages: Math.ceil(total / Number(limit)) });
+    res.json({ blogs, ...paginationMeta(total, page, limit) });
   } catch (err) {
     res.status(500).json({ message: "Could not fetch blogs.", error: err.message });
   }
 });
 
-// GET /api/blogs/admin/all — admin only, includes drafts.
+// GET /api/blogs/admin/all — admin only, includes drafts, paginated (newest first).
 // NOTE: declared BEFORE "/:slug" below — otherwise Express would treat
 // "admin" as a slug value and this route would never be reached.
 router.get("/admin/all", requireAdmin, async (req, res) => {
-  const blogs = await Blog.find().sort({ createdAt: -1 });
-  res.json(blogs);
+  try {
+    const { page, limit, skip } = parsePagination(req.query, { defaultLimit: 10, maxLimit: 50 });
+    const [blogs, total] = await Promise.all([
+      Blog.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Blog.countDocuments(),
+    ]);
+    res.json({ blogs, ...paginationMeta(total, page, limit) });
+  } catch (err) {
+    res.status(500).json({ message: "Could not fetch blogs.", error: err.message });
+  }
 });
 
 // GET /api/blogs/:slug — public detail
@@ -40,8 +49,8 @@ router.get("/:slug", async (req, res) => {
 
     const recent = await Blog.find({ _id: { $ne: blog._id }, published: true })
       .sort({ createdAt: -1 })
-      .limit(3)
-      .select("title slug coverImage createdAt");
+      .limit(6)
+      .select("title slug coverImage createdAt excerpt category");
 
     res.json({ blog, recent });
   } catch (err) {

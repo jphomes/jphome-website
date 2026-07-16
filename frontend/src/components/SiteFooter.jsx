@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import WhatsAppIcon from "./WhatsAppIcon.jsx";
+import BrandLogo from "./BrandLogo.jsx";
 import { buildGeneralWhatsAppMessage, openWhatsApp } from "../utils/whatsapp.js";
 import { BRAND } from "../config/brand.js";
 
@@ -9,7 +10,9 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="page-wrap site-footer-grid">
         <div>
-          <h3 className="site-footer-logo">JP <span>Group</span></h3>
+          <Link to="/" className="site-footer-logo" aria-label={BRAND.fullName}>
+            <BrandLogo variant="horizontal" className="site-footer-logo-img" />
+          </Link>
           <p className="text-sm text-muted leading-relaxed max-w-xs mt-2">
             RERA approved residential plots & gated townships across Greater Raipur since {BRAND.since}.
           </p>

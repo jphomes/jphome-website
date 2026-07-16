@@ -115,7 +115,9 @@ const DEMO_PROPERTIES = [
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const { resolveMongoUri } = require("./mongoUri");
+    const mongo = resolveMongoUri();
+    await mongoose.connect(mongo.uri);
 
     const existing = await Property.countDocuments();
     if (existing > 0) {

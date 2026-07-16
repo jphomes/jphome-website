@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios.js";
+import ImageUploader from "../../components/ImageUploader.jsx";
+import AdminShell from "../../components/AdminShell.jsx";
+import MarkdownCheatSheet from "../../components/MarkdownCheatSheet.jsx";
 
 const initial = {
   title: "",
   excerpt: "",
   content: "",
-  coverImage: "",
   category: "Market Insights",
   tags: "",
   readTimeMinutes: 4,
@@ -16,6 +18,7 @@ const initial = {
 export default function AddBlog() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initial);
+  const [coverImage, setCoverImage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,8 +32,15 @@ export default function AddBlog() {
     setError("");
     setSubmitting(true);
 
+    if (!coverImage) {
+      setError("Upload a cover image.");
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       ...form,
+      coverImage,
       readTimeMinutes: Number(form.readTimeMinutes) || 4,
       tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
     };
@@ -46,60 +56,77 @@ export default function AddBlog() {
   };
 
   return (
-    <div className="min-h-screen bg-stone/30 pt-24 pb-20">
-      <div className="max-w-3xl mx-auto px-6 lg:px-0">
-        <p className="text-brass text-xs tracking-widest2 uppercase mb-2">Admin Panel</p>
-        <h1 className="font-display text-3xl text-ink mb-8">Add Blog Post</h1>
-
-        <form onSubmit={handleSubmit} className="bg-white/70 border border-ink/10 p-8 space-y-6">
+    <AdminShell
+      title="Add journal post"
+      subtitle="Admin studio"
+      actions={<Link to="/admin/dashboard" className="admin-back-link">← Dashboard</Link>}
+    >
+      <div className="admin-blog-layout">
+        <form onSubmit={handleSubmit} className="admin-form">
           <Field label="Title" name="title" value={form.title} onChange={handleChange} required />
-          <Field label="Excerpt (short summary shown on cards)" name="excerpt" value={form.excerpt} onChange={handleChange} textarea required />
           <Field
-            label="Content (HTML or plain paragraphs)"
-            name="content"
-            value={form.content}
+            label="Excerpt (short summary for cards)"
+            name="excerpt"
+            value={form.excerpt}
             onChange={handleChange}
             textarea
-            rows={10}
             required
           />
-          <Field label="Cover Image URL" name="coverImage" value={form.coverImage} onChange={handleChange} required />
+          <div className="admin-field">
+            <label htmlFor="blog-content">Content (use the formatting cheat sheet)</label>
+            <textarea
+              id="blog-content"
+              name="content"
+              rows={16}
+              value={form.content}
+              onChange={handleChange}
+              required
+              placeholder={"## Why prices have stayed strong\n\nBengaluru stays resilient because of **IT demand**.\n\n### Areas to watch\n\n- North corridor\n- Marathahalli\n- Sarjapur Road"}
+            />
+            <p className="admin-md-hint">
+              Quick: <code>## Heading</code> · <code>### Subheading</code> · <code>**bold**</code> ·{" "}
+              <code>*italic*</code> · <code>- bullet</code> · <code>1. numbered</code>
+            </p>
+          </div>
+
+          <ImageUploader
+            label="Cover image"
+            value={coverImage ? [coverImage] : []}
+            onChange={(url) => setCoverImage(typeof url === "string" ? url : url[0] || "")}
+            folder="jpgroup/blogs"
+          />
 
           <div className="grid sm:grid-cols-3 gap-4">
             <Field label="Category" name="category" value={form.category} onChange={handleChange} />
-            <Field label="Tags (comma-separated)" name="tags" value={form.tags} onChange={handleChange} />
-            <Field label="Read Time (minutes)" name="readTimeMinutes" value={form.readTimeMinutes} onChange={handleChange} type="number" />
+            <Field label="Tags" name="tags" value={form.tags} onChange={handleChange} placeholder="plots, raipur" />
+            <Field label="Read time (min)" name="readTimeMinutes" value={form.readTimeMinutes} onChange={handleChange} type="number" />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-ink/70">
+          <label className="admin-check">
             <input type="checkbox" name="published" checked={form.published} onChange={handleChange} />
             Publish immediately
           </label>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p className="admin-error">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="bg-charcoal text-stone text-sm tracking-widest2 uppercase px-8 py-3 hover:bg-brassdark disabled:opacity-50"
-          >
-            {submitting ? "Saving…" : "Publish Post"}
+          <button type="submit" disabled={submitting} className="admin-btn-primary self-start">
+            {submitting ? "Saving…" : "Publish post"}
           </button>
         </form>
+
+        <div className="admin-blog-aside">
+          <MarkdownCheatSheet />
+        </div>
       </div>
-    </div>
+    </AdminShell>
   );
 }
 
 function Field({ label, textarea, rows = 3, ...props }) {
   return (
-    <div>
-      <label className="text-xs tracking-widest2 uppercase text-ink/50">{label}</label>
-      {textarea ? (
-        <textarea rows={rows} {...props} className="mt-1 w-full bg-transparent border-b border-ink/20 focus:border-brass py-2 outline-none resize-none" />
-      ) : (
-        <input {...props} className="mt-1 w-full bg-transparent border-b border-ink/20 focus:border-brass py-2 outline-none" />
-      )}
+    <div className="admin-field">
+      <label>{label}</label>
+      {textarea ? <textarea rows={rows} {...props} /> : <input {...props} />}
     </div>
   );
 }

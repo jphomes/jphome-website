@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import api from "../api/axios.js";
 import PropertyCard from "../components/PropertyCard.jsx";
 import Pagination from "../components/Pagination.jsx";
+import { PROPERTY_TYPES } from "../config/propertyTypes.js";
 
-const propertyTypes = ["Plot", "Villa", "Apartment", "Bungalow", "Commercial", "Penthouse"];
-const statuses = ["For Sale", "For Rent", "Sold", "Rented"];
 const PAGE_SIZE = 10;
 
 export default function Properties() {
@@ -24,11 +23,11 @@ export default function Properties() {
     rera: "",
   });
 
-  const fetchProperties = (targetPage = 1) => {
+  const fetchProperties = (targetPage = 1, nextFilters = filters) => {
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
     const params = { page: targetPage, limit: PAGE_SIZE };
-    Object.entries(filters).forEach(([k, v]) => {
+    Object.entries(nextFilters).forEach(([k, v]) => {
       if (v) params[k] = v;
     });
     api
@@ -52,47 +51,108 @@ export default function Properties() {
   return (
     <div className="page-wrap py-6 md:py-10">
       <div className="mb-6">
-        <h1 className="font-display text-2xl md:text-4xl text-primary font-semibold">Residential Plots & Projects</h1>
-        <p className="text-muted text-sm mt-2">RERA approved land for sale in Greater Raipur</p>
+        <h1 className="font-display text-2xl md:text-4xl text-primary font-semibold">Projects & Listings</h1>
+        <p className="text-muted text-sm mt-2">Filter by type — residential, commercial, land & more</p>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); fetchProperties(1); }} className="filter-panel mb-6 space-y-3">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          fetchProperties(1);
+        }}
+        className="filter-panel mb-6 space-y-3"
+      >
         <input
           placeholder="Search by project name or location…"
           value={filters.q}
           onChange={(e) => setFilters({ ...filters, q: e.target.value })}
           className={inputClass}
         />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <select value={filters.propertyType} onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })} className={inputClass}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <select
+            value={filters.propertyType}
+            onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
+            className={inputClass}
+          >
             <option value="">All Types</option>
-            {propertyTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+            {PROPERTY_TYPES.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
           </select>
-          <select value={filters.rera} onChange={(e) => setFilters({ ...filters, rera: e.target.value })} className={inputClass}>
+          <select
+            value={filters.rera}
+            onChange={(e) => setFilters({ ...filters, rera: e.target.value })}
+            className={inputClass}
+          >
             <option value="">RERA Status</option>
             <option value="true">RERA Approved</option>
           </select>
-          <input placeholder="Min ₹" value={filters.minPrice} onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })} className={inputClass} />
-          <input placeholder="Max ₹" value={filters.maxPrice} onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })} className={inputClass} />
+          <input
+            placeholder="Min ₹"
+            value={filters.minPrice}
+            onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+            className={inputClass}
+          />
+          <input
+            placeholder="Max ₹"
+            value={filters.maxPrice}
+            onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {PROPERTY_TYPES.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => {
+                const next = {
+                  ...filters,
+                  propertyType: filters.propertyType === t ? "" : t,
+                };
+                setFilters(next);
+                fetchProperties(1, next);
+              }}
+              className={`type-chip ${filters.propertyType === t ? "type-chip-active" : ""}`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <input placeholder="Min sq.ft" value={filters.minArea} onChange={(e) => setFilters({ ...filters, minArea: e.target.value })} className={inputClass} />
-          <input placeholder="Max sq.ft" value={filters.maxArea} onChange={(e) => setFilters({ ...filters, maxArea: e.target.value })} className={inputClass} />
+          <input
+            placeholder="Min sq.ft"
+            value={filters.minArea}
+            onChange={(e) => setFilters({ ...filters, minArea: e.target.value })}
+            className={inputClass}
+          />
+          <input
+            placeholder="Max sq.ft"
+            value={filters.maxArea}
+            onChange={(e) => setFilters({ ...filters, maxArea: e.target.value })}
+            className={inputClass}
+          />
         </div>
         <button type="submit" className="btn-primary w-full md:w-auto">Search Listings</button>
       </form>
 
       {loading ? (
         <div className="properties-grid space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-56 bg-mint rounded-2xl animate-pulse" />)}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-56 bg-mint rounded-2xl animate-pulse" />
+          ))}
         </div>
       ) : properties.length === 0 ? (
         <p className="text-sm text-muted text-center py-12">No properties found.</p>
       ) : (
         <>
-          <p className="text-xs text-muted mb-4">{total} projects · Page {page}/{totalPages}</p>
+          <p className="text-xs text-muted mb-4">
+            {total} projects · Newest first · Page {page}/{totalPages}
+          </p>
           <div className="properties-grid space-y-3">
-            {properties.map((p) => <PropertyCard key={p._id} property={p} />)}
+            {properties.map((p) => (
+              <PropertyCard key={p._id} property={p} />
+            ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onPageChange={fetchProperties} />
         </>
