@@ -9,8 +9,11 @@ const propertyRoutes = require("./routes/properties");
 const blogRoutes = require("./routes/blogs");
 const enquiryRoutes = require("./routes/enquiry");
 const uploadRoutes = require("./routes/upload");
+const { resolveMongoUri } = require("./utils/mongoUri");
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+const isVercel = Boolean(process.env.VERCEL);
 
 function parseOrigins(value) {
   return String(value || "")
@@ -22,6 +25,35 @@ function parseOrigins(value) {
 const allowedOrigins = parseOrigins(
   process.env.CLIENT_URL || "http://localhost:5173"
 );
+
+let mongo;
+try {
+  mongo = resolveMongoUri();
+} catch (err) {
+  console.error("❌", err.message);
+  if (!isVercel) process.exit(1);
+  throw err;
+}
+
+const mongoReady = mongoose
+  .connect(mongo.uri)
+  .then(() => {
+    console.log(`✅ MongoDB connected (${mongo.label})`);
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+    if (!isVercel) process.exit(1);
+    throw err;
+  });
+
+app.use(async (req, res, next) => {
+  try {
+    await mongoReady;
+    next();
+  } catch (err) {
+    res.status(503).json({ message: "Database unavailable." });
+  }
+});
 
 app.use(
   cors({
@@ -57,24 +89,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong on the server." });
 });
 
-const PORT = process.env.PORT || 5000;
-const { resolveMongoUri } = require("./utils/mongoUri");
-
-let mongo;
-try {
-  mongo = resolveMongoUri();
-} catch (err) {
-  console.error("❌", err.message);
-  process.exit(1);
+if (!isVercel) {
+  mongoReady.then(() => {
+    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+  });
 }
 
-mongoose
-  .connect(mongo.uri)
-  .then(() => {
-    console.log(`✅ MongoDB connected (${mongo.label})`);
-    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1);
-  });
+module.exports = app;
