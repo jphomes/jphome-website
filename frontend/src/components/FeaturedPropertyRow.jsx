@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { FiMapPin, FiChevronRight } from "react-icons/fi";
-import { formatPrice, formatLocation } from "../utils/property.js";
+import { formatPrice, formatLocation, formatSpecsSummary } from "../utils/property.js";
 
 function configLabel(property) {
-  const { specs, propertyType } = property;
-  if (specs?.sqft) return `${specs.sqft.toLocaleString("en-IN")} Sq.Ft · ${propertyType}`;
+  const { propertyType } = property;
+  const summary = formatSpecsSummary(propertyType, property.specs);
+  if (summary) return `${summary} · ${propertyType}`;
   return propertyType;
 }
 

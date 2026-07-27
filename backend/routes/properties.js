@@ -9,8 +9,21 @@ const {
   cloudinary,
 } = require("../utils/cloudinary");
 const { parsePagination, paginationMeta } = require("../utils/pagination");
+const {
+  normalizePropertyType,
+  PROPERTY_TYPE_ALIASES,
+} = require("../constants/propertyTypes");
 
 const router = express.Router();
+
+function propertyTypeFilterValue(propertyType) {
+  if (!propertyType) return null;
+  const canonical = normalizePropertyType(propertyType);
+  const legacy = Object.entries(PROPERTY_TYPE_ALIASES)
+    .filter(([, v]) => v === canonical)
+    .map(([k]) => k);
+  return { $in: [...new Set([canonical, propertyType, ...legacy])] };
+}
 
 /** Strip broken Cloudinary flags and try raw + image delivery URLs. */
 function brochureFetchCandidates(brochureUrl, brochurePublicId) {
@@ -90,7 +103,7 @@ router.get("/", async (req, res) => {
 
     const filter = {};
     if (city) filter["location.city"] = new RegExp(city, "i");
-    if (propertyType) filter.propertyType = propertyType;
+    if (propertyType) filter.propertyType = propertyTypeFilterValue(propertyType);
     if (status) filter.status = status;
     if (bedrooms) filter["specs.bedrooms"] = { $gte: Number(bedrooms) };
     if (featured) filter.featured = featured === "true";
@@ -217,6 +230,10 @@ router.post("/", requireAdmin, async (req, res) => {
   try {
     const body = { ...req.body, createdBy: req.admin.id };
     body.youtubeUrl = normalizeYoutubeUrl(body.youtubeUrl);
+    if (body.propertyType) body.propertyType = normalizePropertyType(body.propertyType);
+    if (body.specs && typeof body.specs === "object") {
+      body.specs = { ...body.specs, sqft: Number(body.specs.sqft) || 0 };
+    }
     const images = body.images || [];
     body.imagePublicIds = collectPublicIds(images, body.imagePublicIds);
     if (!body.coverImage && images[0]) body.coverImage = images[0];
@@ -237,6 +254,11 @@ router.put("/:id", requireAdmin, async (req, res) => {
     const body = { ...req.body };
     if (body.youtubeUrl !== undefined) {
       body.youtubeUrl = normalizeYoutubeUrl(body.youtubeUrl);
+    }
+    if (body.propertyType) body.propertyType = normalizePropertyType(body.propertyType);
+    // Replace specs entirely so type-specific unused fields don't linger
+    if (body.specs && typeof body.specs === "object") {
+      body.specs = { ...body.specs, sqft: Number(body.specs.sqft) || 0 };
     }
 
     const nextImages = body.images || existing.images || [];
@@ -268,6 +290,11 @@ router.put("/:id", requireAdmin, async (req, res) => {
       await destroyByPublicId(existing.brochurePublicId, "raw");
       await destroyByPublicId(existing.brochurePublicId, "image");
       body.brochurePublicId = "";
+    }
+
+    // Clear old specs first so unused type fields don't linger
+    if (body.specs) {
+      await Property.findByIdAndUpdate(req.params.id, { $unset: { specs: 1 } });
     }
 
     const property = await Property.findByIdAndUpdate(req.params.id, body, {

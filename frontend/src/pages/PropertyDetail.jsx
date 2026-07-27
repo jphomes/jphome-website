@@ -11,6 +11,8 @@ import { formatPrice, formatLocation } from "../utils/property.js";
 import { buildPropertyWhatsAppMessage } from "../utils/whatsapp.js";
 import { getYoutubeEmbedUrl } from "../utils/youtube.js";
 import { downloadBrochure, getBrochureDownloadApiUrl, getBrochureUrl } from "../utils/brochure.js";
+import PropertySpecsDisplay from "../components/PropertySpecsDisplay.jsx";
+import { normalizePropertyType } from "../config/propertyTypes.js";
 
 const DISTRICT = import.meta.env.VITE_DISTRICT_NAME || "Raipur";
 
@@ -61,6 +63,7 @@ export default function PropertyDetail() {
     reraNumber,
     youtubeUrl,
   } = property;
+  const displayType = normalizePropertyType(propertyType);
   const gallery = images?.length ? images : [coverImage];
   const whatsappMessage = buildPropertyWhatsAppMessage(property);
   const landmarks = (nearbyLandmarks || []).filter((l) => l?.name);
@@ -70,7 +73,6 @@ export default function PropertyDetail() {
   const handleBrochureDownload = (e) => {
     e.preventDefault();
     const safeName = `${(title || "brochure").replace(/[^\w\-]+/g, "_").slice(0, 40)}.pdf`;
-    // Prefer backend proxy — Cloudinary image/upload + fl_attachment returns HTTP 400
     downloadBrochure(brochureApiUrl || brochureHref, safeName);
   };
 
@@ -83,7 +85,7 @@ export default function PropertyDetail() {
           badges={
             <div className="flex gap-2 mb-2 flex-wrap">
               <span className="badge-brass">{status}</span>
-              <span className="badge-muted">{propertyType}</span>
+              <span className="badge-muted">{displayType}</span>
               {reraApproved && <span className="rera-badge">RERA Approved</span>}
             </div>
           }
@@ -122,19 +124,10 @@ export default function PropertyDetail() {
               <p className="text-lg md:text-2xl font-bold text-secondary shrink-0">{formatPrice(property)}</p>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                ["Sq.Ft", specs.sqft?.toLocaleString("en-IN")],
-                ["Beds", specs.bedrooms],
-                ["Baths", specs.bathrooms],
-                ["Park", specs.parking],
-              ].map(([label, val]) => (
-                <div key={label} className="spec-tile text-center py-2.5">
-                  <p className="text-sm font-semibold text-forest">{val ?? "—"}</p>
-                  <p className="text-[9px] uppercase text-ink/40 mt-0.5">{label}</p>
-                </div>
-              ))}
-            </div>
+            <PropertySpecsDisplay
+              propertyType={displayType}
+              specs={specs}
+            />
 
             <div>
               <h2 className="section-title">Overview</h2>
@@ -184,8 +177,8 @@ export default function PropertyDetail() {
 
       {related.length > 0 && (
         <div className="page-wrap mt-8 md:mt-12 pb-4">
-          <h2 className="section-title">Similar {propertyType} projects</h2>
-          <p className="text-sm text-muted mb-4 -mt-2">Matching type: {propertyType}</p>
+          <h2 className="section-title">Similar {displayType} projects</h2>
+          <p className="text-sm text-muted mb-4 -mt-2">Matching type: {displayType}</p>
           <div className="properties-grid space-y-3">
             {related.slice(0, 3).map((p) => <PropertyCard key={p._id} property={p} />)}
           </div>

@@ -2,6 +2,43 @@ const mongoose = require("mongoose");
 const slugify = require("slugify");
 const { ALL_PROPERTY_TYPES } = require("../constants/propertyTypes");
 
+/**
+ * Flexible specs — fields vary by propertyType.
+ * sqft kept for list filters/cards; other keys optional.
+ */
+const SpecsSchema = new mongoose.Schema(
+  {
+    sqft: { type: Number, default: 0 },
+    acres: { type: Number },
+    plotSize: { type: Number },
+    constructionArea: { type: Number },
+    carpetArea: { type: Number },
+    builtUpArea: { type: Number },
+    front: { type: Number },
+    depth: { type: Number },
+    facing: { type: String, trim: true },
+    roadWidth: { type: Number },
+    cornerProperty: { type: String, trim: true },
+    openSides: { type: String, trim: true },
+    preleased: { type: String, trim: true },
+    possessionStatus: { type: String, trim: true },
+    floorAvailable: { type: String, trim: true },
+    totalFloors: { type: Number },
+    yourFloor: { type: Number },
+    noOfFloors: { type: Number },
+    landUse: { type: String, trim: true },
+    fencing: { type: String, trim: true },
+    bedrooms: { type: Number, default: 0 },
+    bathrooms: { type: Number, default: 0 },
+    parking: { type: Number, default: 0 },
+    furnishedType: { type: String, trim: true },
+    servantRoom: { type: String, trim: true },
+    floors: { type: Number },
+    yearBuilt: { type: Number },
+  },
+  { _id: false }
+);
+
 const PropertySchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -26,14 +63,7 @@ const PropertySchema = new mongoose.Schema(
       lat: { type: Number },
       lng: { type: Number },
     },
-    specs: {
-      sqft: { type: Number, required: true },
-      bedrooms: { type: Number, default: 0 },
-      bathrooms: { type: Number, default: 0 },
-      parking: { type: Number, default: 0 },
-      floors: { type: Number },
-      yearBuilt: { type: Number },
-    },
+    specs: { type: SpecsSchema, default: () => ({}) },
     amenities: [{ type: String }],
     nearbyLandmarks: [
       {

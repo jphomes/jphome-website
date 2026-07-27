@@ -8,6 +8,7 @@ const BlogSchema = new mongoose.Schema(
     excerpt: { type: String, required: true },
     content: { type: String, required: true }, // markdown or HTML
     coverImage: { type: String, required: true },
+    youtubeUrl: { type: String, trim: true, default: "" },
     category: { type: String, default: "Market Insights" },
     tags: [{ type: String }],
     published: { type: Boolean, default: true },

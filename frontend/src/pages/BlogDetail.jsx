@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios.js";
 import BlogMarkdown from "../utils/blogMarkdown.jsx";
+import YoutubeEmbed from "../components/YoutubeEmbed.jsx";
+import { getYoutubeEmbedUrl } from "../utils/youtube.js";
 
 export default function BlogDetail() {
   const { slug } = useParams();
@@ -42,6 +44,7 @@ export default function BlogDetail() {
     month: "long",
     year: "numeric",
   });
+  const hasVideo = Boolean(getYoutubeEmbedUrl(blog.youtubeUrl));
 
   return (
     <div className="pb-6">
@@ -55,6 +58,17 @@ export default function BlogDetail() {
         </p>
 
         <BlogMarkdown content={blog.content} />
+
+        {hasVideo && (
+          <div className="mt-8">
+            <YoutubeEmbed
+              url={blog.youtubeUrl}
+              title={`${blog.title} video`}
+              heading="Watch video"
+              description="Related video for this journal post."
+            />
+          </div>
+        )}
 
         {blog.tags?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-6">
@@ -85,10 +99,7 @@ export default function BlogDetail() {
               });
               return (
                 <li key={r._id}>
-                  <Link
-                    to={`/blogs/${r.slug}`}
-                    className="more-article-card"
-                  >
+                  <Link to={`/blogs/${r.slug}`} className="more-article-card">
                     {r.coverImage ? (
                       <img src={r.coverImage} alt="" className="more-article-thumb" />
                     ) : (

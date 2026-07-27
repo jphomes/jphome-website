@@ -4,7 +4,14 @@ import api from "../../api/axios.js";
 import ImageUploader from "../../components/ImageUploader.jsx";
 import BrochureUploader from "../../components/BrochureUploader.jsx";
 import AdminShell from "../../components/AdminShell.jsx";
-import { PROPERTY_TYPES } from "../../config/propertyTypes.js";
+import PropertySpecsFields from "../../components/PropertySpecsFields.jsx";
+import {
+  PROPERTY_TYPES,
+  normalizePropertyType,
+  emptySpecsValues,
+  specsFromProperty,
+  buildSpecsPayload,
+} from "../../config/propertyTypes.js";
 import { getYoutubeEmbedId } from "../../utils/youtube.js";
 import { withRupee } from "../../utils/property.js";
 
@@ -14,14 +21,10 @@ const emptyForm = {
   price: "",
   priceLabel: "",
   status: "For Sale",
-  propertyType: "Land Parcel",
+  propertyType: "Residential Plot",
   city: "Raipur",
   area: "",
   address: "",
-  sqft: "",
-  bedrooms: "",
-  bathrooms: "",
-  parking: "",
   amenities: "",
   landmarksText: "",
   youtubeUrl: "",
@@ -58,14 +61,10 @@ function propertyToForm(p) {
     price: p.price ?? "",
     priceLabel: p.priceLabel || "",
     status: p.status || "For Sale",
-    propertyType: p.propertyType || "Land Parcel",
+    propertyType: normalizePropertyType(p.propertyType || "Residential Plot"),
     city: p.location?.city || "Raipur",
     area: p.location?.area || "",
     address: p.location?.address || "",
-    sqft: p.specs?.sqft ?? "",
-    bedrooms: p.specs?.bedrooms ?? "",
-    bathrooms: p.specs?.bathrooms ?? "",
-    parking: p.specs?.parking ?? "",
     amenities: (p.amenities || []).join(", "),
     landmarksText: landmarksToText(p.nearbyLandmarks || []),
     youtubeUrl: p.youtubeUrl || "",
@@ -80,6 +79,7 @@ export default function PropertyFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
+  const [specs, setSpecs] = useState(emptySpecsValues());
   const [images, setImages] = useState([]);
   const [brochureUrl, setBrochureUrl] = useState("");
   const [brochurePublicId, setBrochurePublicId] = useState("");
@@ -94,6 +94,7 @@ export default function PropertyFormPage() {
       .get(`/properties/admin/${id}`)
       .then((res) => {
         setForm(propertyToForm(res.data));
+        setSpecs(specsFromProperty(res.data.specs || {}));
         setImages(res.data.images || []);
         setBrochureUrl(res.data.brochureUrl || "");
         setBrochurePublicId(res.data.brochurePublicId || "");
@@ -104,7 +105,16 @@ export default function PropertyFormPage() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "propertyType") {
+      setForm((prev) => ({ ...prev, propertyType: value }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  const handleSpecsChange = (e) => {
+    const { name, value } = e.target;
+    setSpecs((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -124,11 +134,7 @@ export default function PropertyFormPage() {
       return;
     }
 
-    const typeOptions = PROPERTY_TYPES.includes(form.propertyType)
-      ? PROPERTY_TYPES
-      : [...PROPERTY_TYPES, form.propertyType];
-
-    if (!typeOptions.includes(form.propertyType)) {
+    if (!PROPERTY_TYPES.includes(form.propertyType)) {
       setError("Choose a valid property type.");
       setSubmitting(false);
       return;
@@ -142,12 +148,7 @@ export default function PropertyFormPage() {
       status: form.status,
       propertyType: form.propertyType,
       location: { city: form.city, area: form.area, address: form.address },
-      specs: {
-        sqft: Number(form.sqft) || 0,
-        bedrooms: Number(form.bedrooms) || 0,
-        bathrooms: Number(form.bathrooms) || 0,
-        parking: Number(form.parking) || 0,
-      },
+      specs: buildSpecsPayload(form.propertyType, specs),
       amenities: form.amenities.split(",").map((s) => s.trim()).filter(Boolean),
       nearbyLandmarks: parseLandmarks(form.landmarksText),
       images,
@@ -170,10 +171,6 @@ export default function PropertyFormPage() {
       setSubmitting(false);
     }
   };
-
-  const typeSelectOptions = PROPERTY_TYPES.includes(form.propertyType)
-    ? PROPERTY_TYPES
-    : [...PROPERTY_TYPES, form.propertyType];
 
   if (loading) {
     return (
@@ -214,19 +211,24 @@ export default function PropertyFormPage() {
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
-          <Select label="Type" name="propertyType" value={form.propertyType} onChange={handleChange} options={typeSelectOptions} />
+          <Select
+            label="Property type"
+            name="propertyType"
+            value={form.propertyType}
+            onChange={handleChange}
+            options={PROPERTY_TYPES}
+          />
           <Field label="City" name="city" value={form.city} onChange={handleChange} required />
           <Field label="Area / locality" name="area" value={form.area} onChange={handleChange} required />
         </div>
 
         <Field label="Full address" name="address" value={form.address} onChange={handleChange} />
 
-        <div className="grid sm:grid-cols-4 gap-4">
-          <Field label="Sq.Ft" name="sqft" value={form.sqft} onChange={handleChange} type="number" required />
-          <Field label="Bedrooms" name="bedrooms" value={form.bedrooms} onChange={handleChange} type="number" />
-          <Field label="Bathrooms" name="bathrooms" value={form.bathrooms} onChange={handleChange} type="number" />
-          <Field label="Parking" name="parking" value={form.parking} onChange={handleChange} type="number" />
-        </div>
+        <PropertySpecsFields
+          propertyType={form.propertyType}
+          values={specs}
+          onChange={handleSpecsChange}
+        />
 
         <Field label="Amenities (comma-separated)" name="amenities" value={form.amenities} onChange={handleChange} placeholder="Pool, Gym, 24x7 Security" />
 

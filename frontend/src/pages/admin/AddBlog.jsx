@@ -4,11 +4,13 @@ import api from "../../api/axios.js";
 import ImageUploader from "../../components/ImageUploader.jsx";
 import AdminShell from "../../components/AdminShell.jsx";
 import MarkdownCheatSheet from "../../components/MarkdownCheatSheet.jsx";
+import { getYoutubeEmbedId } from "../../utils/youtube.js";
 
 const initial = {
   title: "",
   excerpt: "",
   content: "",
+  youtubeUrl: "",
   category: "Market Insights",
   tags: "",
   readTimeMinutes: 4,
@@ -38,8 +40,16 @@ export default function AddBlog() {
       return;
     }
 
+    const youtubeUrl = form.youtubeUrl.trim();
+    if (youtubeUrl && !getYoutubeEmbedId(youtubeUrl)) {
+      setError("Enter a valid YouTube link (watch, youtu.be, shorts, or embed), or leave it blank.");
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       ...form,
+      youtubeUrl,
       coverImage,
       readTimeMinutes: Number(form.readTimeMinutes) || 4,
       tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
@@ -88,6 +98,17 @@ export default function AddBlog() {
               <code>*italic*</code> · <code>- bullet</code> · <code>1. numbered</code>
             </p>
           </div>
+
+          <Field
+            label="YouTube URL (optional)"
+            name="youtubeUrl"
+            value={form.youtubeUrl}
+            onChange={handleChange}
+            placeholder="https://www.youtube.com/watch?v=…"
+          />
+          <p className="text-xs text-muted -mt-2 mb-1">
+            Leave blank if there’s no video. Valid watch / youtu.be / shorts links only.
+          </p>
 
           <ImageUploader
             label="Cover image"

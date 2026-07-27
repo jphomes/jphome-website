@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { formatPrice, formatLocation } from "../utils/property.js";
+import { formatPrice, formatLocation, formatSpecsSummary } from "../utils/property.js";
 
 export default function PropertyCard({ property }) {
-  const { title, slug, coverImage, location, specs, status, reraApproved } = property;
+  const { title, slug, coverImage, location, specs, status, reraApproved, propertyType } = property;
+  const sizeLabel = formatSpecsSummary(propertyType, specs) || null;
 
   return (
     <Link to={`/properties/${slug}`} className="group card-elevated block bg-white overflow-hidden">
@@ -28,9 +29,11 @@ export default function PropertyCard({ property }) {
           </svg>
           {formatLocation(location)}
         </p>
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-sage/50">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-sage/50 gap-2">
           <span className="text-sm font-semibold text-secondary">{formatPrice(property)}</span>
-          <span className="text-[11px] text-muted">{specs.sqft?.toLocaleString("en-IN")} sq.ft</span>
+          {sizeLabel ? (
+            <span className="text-[11px] text-muted text-right line-clamp-2">{sizeLabel}</span>
+          ) : null}
         </div>
         <p className="text-[11px] font-semibold text-gold mt-2">View Details →</p>
       </div>

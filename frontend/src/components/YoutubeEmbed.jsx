@@ -1,14 +1,19 @@
 import React from "react";
 import { getYoutubeEmbedUrl } from "../utils/youtube.js";
 
-export default function YoutubeEmbed({ url, title = "Property video" }) {
+export default function YoutubeEmbed({
+  url,
+  title = "Video",
+  heading = "Video Tour",
+  description = "Watch a quick walkthrough of this project.",
+}) {
   const embedUrl = getYoutubeEmbedUrl(url);
   if (!embedUrl) return null;
 
   return (
     <section className="youtube-section">
-      <h2 className="section-title">Video Tour</h2>
-      <p className="text-sm text-muted mb-3">Watch a quick walkthrough of this project.</p>
+      {heading ? <h2 className="section-title">{heading}</h2> : null}
+      {description ? <p className="text-sm text-muted mb-3">{description}</p> : null}
       <div className="youtube-frame-wrap">
         <iframe
           src={embedUrl}

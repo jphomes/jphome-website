@@ -1,10 +1,11 @@
+import { formatSpecsSummary } from "../config/propertyTypes.js";
+
 /** Ensure display strings start with the Indian rupee sign. */
 export function withRupee(value) {
   if (value == null || value === "") return "";
   const text = String(value).trim();
   if (!text) return "";
   if (text.includes("₹")) return text;
-  // Normalise Rs / INR prefixes to ₹
   const stripped = text.replace(/^(rs\.?|inr)\s*/i, "");
   return `₹${stripped}`;
 }
@@ -27,13 +28,17 @@ export function formatLocation(location) {
   return parts.join(", ");
 }
 
-export function formatSpecs(specs) {
+export { formatSpecsSummary };
+
+/** Short specs line — prefers type-aware summary when propertyType is passed. */
+export function formatSpecs(specs, propertyType) {
+  if (propertyType) return formatSpecsSummary(propertyType, specs);
   if (!specs) return "";
   const parts = [];
-  if (specs.sqft) parts.push(`${specs.sqft.toLocaleString("en-IN")} sq.ft`);
-  if (specs.bedrooms) parts.push(`${specs.bedrooms} Bed`);
-  if (specs.bathrooms) parts.push(`${specs.bathrooms} Bath`);
-  if (specs.parking) parts.push(`${specs.parking} Parking`);
+  if (specs.acres) parts.push(`${Number(specs.acres).toLocaleString("en-IN")} acres`);
+  else if (specs.sqft) parts.push(`${specs.sqft.toLocaleString("en-IN")} sq.ft`);
+  if (specs.bedrooms) parts.push(`${specs.bedrooms} BHK`);
+  if (specs.facing) parts.push(`${specs.facing} facing`);
   return parts.join(" · ");
 }
 

@@ -28,7 +28,7 @@ export function buildPropertyWhatsAppMessage(property) {
     `${status} · ${propertyType}`,
     `📍 ${formatLocation(location)}`,
     `💰 ${formatPrice(property)}`,
-    `📐 ${formatSpecs(specs)}`,
+    `📐 ${formatSpecs(specs, propertyType) || "Details on request"}`,
     reraNumber ? `📋 RERA: ${reraNumber}` : null,
     "",
     overview ? `_${overview}_` : "",

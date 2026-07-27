@@ -61,7 +61,11 @@ router.get("/:slug", async (req, res) => {
 // POST /api/blogs — admin only
 router.post("/", requireAdmin, async (req, res) => {
   try {
-    const blog = await Blog.create({ ...req.body, createdBy: req.admin.id });
+    const body = { ...req.body, createdBy: req.admin.id };
+    if (body.youtubeUrl !== undefined) {
+      body.youtubeUrl = String(body.youtubeUrl || "").trim();
+    }
+    const blog = await Blog.create(body);
     res.status(201).json(blog);
   } catch (err) {
     res.status(400).json({ message: "Could not create blog post.", error: err.message });
@@ -71,7 +75,11 @@ router.post("/", requireAdmin, async (req, res) => {
 // PUT /api/blogs/:id — admin only
 router.put("/:id", requireAdmin, async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
+    const body = { ...req.body };
+    if (body.youtubeUrl !== undefined) {
+      body.youtubeUrl = String(body.youtubeUrl || "").trim();
+    }
+    const blog = await Blog.findByIdAndUpdate(req.params.id, body, {
       new: true,
       runValidators: true,
     });

@@ -52,11 +52,14 @@ export default function Contact() {
 
           <WhatsAppButton message={buildGeneralWhatsAppMessage()} label="WhatsApp Us" fullWidth />
 
-          <div className="rounded-2xl overflow-hidden border border-sage h-48 md:h-56 bg-mint flex items-center justify-center">
-            <p className="text-muted text-sm text-center px-4">
-              📍 {BRAND.city}, {BRAND.state}<br />
-              <span className="text-xs">Map embed can be added here</span>
-            </p>
+          <div className="contact-map-wrap">
+            <iframe
+              title={`${BRAND.fullName} location map`}
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7777.728434516948!2d77.64961918431548!3d12.916447380562394!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae15827747a4e9%3A0x60bfc4476e6de3ec!2sBabai%20Tiffins%2C%20HSR%20Layout!5e0!3m2!1sen!2sin!4v1785129763256!5m2!1sen!2sin"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
         </div>
 
