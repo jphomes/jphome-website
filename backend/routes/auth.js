@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const Admin = require("../models/Admin");
@@ -10,18 +10,33 @@ const router = express.Router();
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Avoid ValidationError behind Vercel/Cloudflare proxies
+  validate: { xForwardedForHeader: false, trustProxy: false },
   message: { message: "Too many login attempts. Try again later." },
 });
 
 // POST /api/auth/login
 router.post("/login", loginLimiter, async (req, res) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        message: "Server misconfigured: JWT_SECRET is missing on Vercel.",
+      });
+    }
+
     const { username, password } = req.body;
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password are required." });
     }
 
-    const admin = await Admin.findOne({ username: username.trim() });
+    const admin = await Admin.findOne({
+      $or: [
+        { username: username.trim() },
+        { email: username.trim().toLowerCase() },
+      ],
+    });
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
@@ -42,6 +57,7 @@ router.post("/login", loginLimiter, async (req, res) => {
       admin: { username: admin.username, name: admin.name, email: admin.email },
     });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Login failed.", error: err.message });
   }
 });
