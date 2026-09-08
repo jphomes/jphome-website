@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FiArrowRight } from "react-icons/fi";
 import { BRAND } from "../config/brand.js";
 import WhatsAppIcon from "./WhatsAppIcon.jsx";
+import SocialLinks from "./SocialLinks.jsx";
 import { openWhatsApp, buildGeneralWhatsAppMessage } from "../utils/whatsapp.js";
 
 export default function HeroSection() {
@@ -24,7 +25,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           className="hero-chip"
         >
-          RERA Approved Developer
+          RERA APPROVED AGENT
         </motion.span>
 
         <motion.p
@@ -36,13 +37,15 @@ export default function HeroSection() {
           {BRAND.fullName} · Since {BRAND.since}
         </motion.p>
 
+        <SocialLinks className="text-white/85 mb-4" />
+
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className="font-display text-[1.75rem] sm:text-3xl md:text-5xl lg:text-6xl text-white font-semibold leading-[1.12] max-w-3xl"
         >
-          Residential Plots & Land for Sale in {BRAND.city}
+          Find your Perfect Property in Raipur & Naya Raipur
         </motion.h1>
 
         <motion.p
@@ -51,7 +54,7 @@ export default function HeroSection() {
           transition={{ delay: 0.25 }}
           className="text-white/82 text-sm md:text-base mt-4 max-w-xl leading-relaxed"
         >
-          RERA approved residential plots across Greater Raipur & Naya Raipur — clear title, bank finance support, and free site visits.
+          BUY SELL RENT
         </motion.p>
 
         <motion.div
@@ -61,10 +64,10 @@ export default function HeroSection() {
           className="hero-cta-group"
         >
           <Link to="/contact" className="btn-primary btn-touch">
-            Enquire Now
+            Talk to Expert
           </Link>
           <Link to="/properties" className="btn-outline-light btn-touch">
-            View Projects
+            View Properties
             <FiArrowRight className="ml-1.5" size={16} />
           </Link>
           <button

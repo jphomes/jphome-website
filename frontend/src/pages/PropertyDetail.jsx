@@ -82,15 +82,16 @@ export default function PropertyDetail() {
         <PropertyGallery
           images={gallery}
           title={title}
-          badges={
-            <div className="flex gap-2 mb-2 flex-wrap">
-              <span className="badge-brass">{status}</span>
-              <span className="badge-muted">{displayType}</span>
-              {reraApproved && <span className="rera-badge">RERA Approved</span>}
-            </div>
-          }
-          overlayTitle={<h1 className="text-white text-xl md:text-3xl font-semibold leading-tight">{title}</h1>}
         />
+
+        <div className="mt-4">
+          <div className="flex gap-2 mb-2 flex-wrap">
+            <span className="badge-brass">{status}</span>
+            <span className="badge-muted">{displayType}</span>
+            {reraApproved && <span className="rera-badge">RERA Approved</span>}
+          </div>
+          <h1 className="text-primary text-xl md:text-3xl font-semibold leading-tight">{title}</h1>
+        </div>
 
         {brochureHref && (
           <button

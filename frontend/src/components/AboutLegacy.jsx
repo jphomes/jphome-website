@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BRAND } from "../config/brand.js";
 import SectionHeading from "./SectionHeading.jsx";
+import gauravSondagarImage from "../assets/imagesUsed/gaurav_sondagar.PNG";
 
 export default function AboutLegacy() {
   return (
@@ -16,8 +17,8 @@ export default function AboutLegacy() {
           className="about-legacy-visual"
         >
           <img
-            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop"
-            alt="JP Group legacy"
+            src={gauravSondagarImage}
+            alt="Gaurav Sondagar"
             className="about-legacy-img"
             loading="lazy"
           />
@@ -34,25 +35,28 @@ export default function AboutLegacy() {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <SectionHeading
-            eyebrow="About JP Group"
-            title="A Legacy of Trust & Excellence"
+            eyebrow="About JP Homes"
+            title="Your Property Journey, Guided with Confidence"
             className="mb-4"
           />
           <p className="text-sm md:text-base text-muted leading-relaxed mb-4">
-            For over 28 years, JP Group has been the name families trust when making the most important investment
-            of their lives. Founded in 1995, we have delivered landmark residential projects across Greater Raipur.
-          </p>
-          <p className="text-sm md:text-base text-muted leading-relaxed mb-6">
-            Our philosophy is simple: every plot we develop must stand as a testament to quality,
-            transparent transactions, and enduring value.
+            JP Homes is a Real estate consultancy based in Raipur and Naya Raipur, Founded by Gaurav Sondagar.
+            We help homebuyers, investors, and property owners make informed real estate decisions through expert
+            consultation and local market guidance.
+            <br /><br />
+            Our services include residential and commercial properties, plots, builder projects, farmhouses,
+            investment advisory, property marketing, and resale assistance.
+            <br /><br />
+            Specialising in Naya Raipur investment opportunities, premium residential properties, and builder
+            projects, we provides verified options, transparent advice, and end-to-end support for every property journey.
           </p>
           <ul className="flex flex-wrap gap-2 mb-6">
-            {["RERA Registered", "T&CP Approved", "Bank Loan Ready", "Vastu Compliant"].map((tag) => (
+            {["RERA Approved Projects", "Open market deals", "After Sales Service", "Easy bank finance"].map((tag) => (
               <li key={tag} className="amenity-pill text-[10px]">{tag}</li>
             ))}
           </ul>
-          <Link to="/about" className="inline-link">
-            Our Story →
+          <Link to="/contact" className="inline-link">
+            Book Consultation →
           </Link>
         </motion.div>
       </div>

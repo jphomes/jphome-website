@@ -6,7 +6,7 @@ import {
   getPropertyUrl,
 } from "./property.js";
 
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "9191787187138";
+const WHATSAPP_NUMBER = "918871637383";
 
 export function getWhatsAppNumber() {
   return WHATSAPP_NUMBER.replace(/\D/g, "");
@@ -14,7 +14,7 @@ export function getWhatsAppNumber() {
 
 export function buildPropertyWhatsAppMessage(property) {
   if (!property) {
-    return "Hello, I'd like to enquire about properties at *JP Group Raipur*.";
+    return "Hello, I'd like to enquire about properties at *JP Homes Raipur*.";
   }
 
   const { title, status, propertyType, location, specs, description, slug, reraNumber } = property;
@@ -22,7 +22,7 @@ export function buildPropertyWhatsAppMessage(property) {
   const listingUrl = getPropertyUrl(slug);
 
   return [
-    "Hello, I'm interested in this project from *JP Group Raipur*:",
+    "Hello, I'm interested in this project from *JP Homes Raipur*:",
     "",
     `*${title}*`,
     `${status} · ${propertyType}`,
@@ -41,7 +41,7 @@ export function buildPropertyWhatsAppMessage(property) {
 
 export function buildGeneralWhatsAppMessage() {
   return [
-    "Hello, I'd like to enquire about residential plots at *JP Group Raipur*.",
+    "Hello, I'd like to enquire about properties at *JP Homes Raipur*.",
     "",
     "Please share available projects and schedule a free site visit.",
   ].join("\n");

@@ -7,7 +7,7 @@ export default function WhyChooseUs() {
   return (
     <div className="page-wrap">
       <SectionHeading
-        eyebrow="Why Choose JP Group"
+        eyebrow="Why Choose JP Homes"
         title="6 Reasons to Invest with Confidence"
         align="center"
         className="mb-8 md:mb-10"

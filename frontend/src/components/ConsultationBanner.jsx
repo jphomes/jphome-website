@@ -17,7 +17,9 @@ export default function ConsultationBanner() {
               Ready to Find Your Dream Property?
             </h2>
             <p className="text-sm text-muted leading-relaxed max-w-lg">
-              Let our experts guide you to the right investment in {BRAND.city}. Free consultation and site visits available.
+              Let our experts guide you to the right investment in {BRAND.city}.
+              <br />
+              Free consultation and site visits available.
             </p>
           </div>
           <div className="consultation-actions">

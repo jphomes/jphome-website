@@ -4,7 +4,6 @@ import AppLayout from "./components/AppLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 import Home from "./pages/Home.jsx";
-import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 import Properties from "./pages/Properties.jsx";
 import PropertyDetail from "./pages/PropertyDetail.jsx";
@@ -37,7 +36,7 @@ export default function App() {
     <AppLayout>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/about" element={<Navigate to="/#about" replace />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/properties/:slug" element={<PropertyDetail />} />

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import WhatsAppIcon from "../components/WhatsAppIcon.jsx";
 import api from "../api/axios.js";
 import BlogMarkdown from "../utils/blogMarkdown.jsx";
 import YoutubeEmbed from "../components/YoutubeEmbed.jsx";
 import { getYoutubeEmbedUrl } from "../utils/youtube.js";
+import { buildWhatsAppUrl } from "../utils/whatsapp.js";
 
 export default function BlogDetail() {
   const { slug } = useParams();
@@ -26,6 +28,45 @@ export default function BlogDetail() {
       .catch(() => setNotFound(true));
   }, [slug]);
 
+  useEffect(() => {
+    if (!blog) return undefined;
+
+    const pageUrl = window.location.href;
+    const imageUrl = blog.coverImage ? new URL(blog.coverImage, window.location.origin).href : "";
+    const description = blog.excerpt || "Read the latest property insights from JP Homes Raipur.";
+    const metadata = {
+      description,
+      "og:title": blog.title,
+      "og:description": description,
+      "og:type": "article",
+      "og:url": pageUrl,
+      "og:image": imageUrl,
+      "twitter:card": "summary_large_image",
+      "twitter:title": blog.title,
+      "twitter:description": description,
+      "twitter:image": imageUrl,
+    };
+
+    document.title = `${blog.title} | JP Homes Raipur`;
+    Object.entries(metadata).forEach(([key, content]) => {
+      if (!content) return;
+      const selector = key.startsWith("og:") || key.startsWith("twitter:")
+        ? `meta[property="${key}"]`
+        : `meta[name="${key}"]`;
+      let tag = document.head.querySelector(selector);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(key.startsWith("og:") || key.startsWith("twitter:") ? "property" : "name", key);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute("content", content);
+    });
+
+    return () => {
+      document.title = "JP Homes | Property in Raipur & Naya Raipur";
+    };
+  }, [blog]);
+
   if (notFound) {
     return (
       <div className="py-16 text-center px-4">
@@ -46,6 +87,15 @@ export default function BlogDetail() {
   });
   const author = blog.author === "Tom Sondagar" ? "Gaurav Sondagar" : blog.author;
   const hasVideo = Boolean(getYoutubeEmbedUrl(blog.youtubeUrl));
+  const shareText = [
+    blog.title,
+    "",
+    blog.excerpt,
+    "",
+    `${blog.category} · ${date} · ${blog.readTimeMinutes} min read`,
+    "",
+    `Read the full article: ${window.location.href}`,
+  ].join("\n");
 
   return (
     <div className="pb-6">
@@ -57,6 +107,15 @@ export default function BlogDetail() {
         <p className="text-ink/45 text-xs mt-2">
           {author} · {date} · {blog.readTimeMinutes} min read
         </p>
+        <a
+          href={buildWhatsAppUrl(shareText)}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 mt-4 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#1ebe5d]"
+        >
+          <WhatsAppIcon className="w-[18px] h-[18px]" />
+          Share on WhatsApp
+        </a>
 
         <BlogMarkdown content={blog.content} />
 

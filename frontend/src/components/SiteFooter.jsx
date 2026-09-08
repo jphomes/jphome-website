@@ -4,6 +4,7 @@ import WhatsAppIcon from "./WhatsAppIcon.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 import { buildGeneralWhatsAppMessage, openWhatsApp } from "../utils/whatsapp.js";
 import { BRAND } from "../config/brand.js";
+import SocialLinks from "./SocialLinks.jsx";
 
 export default function SiteFooter() {
   return (
@@ -14,8 +15,9 @@ export default function SiteFooter() {
             <BrandLogo variant="horizontal" className="site-footer-logo-img" />
           </Link>
           <p className="text-sm text-muted leading-relaxed max-w-xs mt-2">
-            RERA approved residential plots & gated townships across Greater Raipur since {BRAND.since}.
+            Rera Approved agent helping you find perfect property in raipur and naya raipur
           </p>
+          <SocialLinks className="text-secondary mt-4" />
         </div>
 
         <div>
@@ -23,7 +25,7 @@ export default function SiteFooter() {
           <ul className="site-footer-links">
             <li><Link to="/properties">Properties</Link></li>
             <li><Link to="/blogs">Blogs</Link></li>
-            <li><Link to="/about">About</Link></li>
+            <li><Link to="/#about">About</Link></li>
             <li><Link to="/contact">Contact</Link></li>
           </ul>
         </div>
@@ -52,8 +54,8 @@ export default function SiteFooter() {
       </div>
 
       <div className="page-wrap site-footer-bottom">
-        <span>© {new Date().getFullYear()} JP Group Raipur</span>
-        <span>RERA Approved Developer</span>
+        <span>© {new Date().getFullYear()} JP Homes Raipur</span>
+        <span>RERA APPROVED AGENT</span>
       </div>
     </footer>
   );

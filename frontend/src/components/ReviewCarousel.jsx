@@ -38,7 +38,7 @@ export default function ReviewCarousel() {
     <div className="page-wrap">
       <SectionHeading
         eyebrow="Client Stories"
-        title="What Our Residents Are Saying"
+        title="What Our Clients Are Saying"
         subtitle="Trusted by families across our townships"
         align="center"
       />

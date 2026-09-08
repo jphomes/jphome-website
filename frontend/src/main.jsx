@@ -6,7 +6,11 @@ import { PersistGate } from "redux-persist/integration/react";
 import App from "./App.jsx";
 import { store, persistor } from "./store/index.js";
 import { AuthBootstrap } from "./components/AuthBootstrap.jsx";
+import logoMark from "./assets/logos/logo-mark.png";
 import "./index.css";
+
+const favicon = document.querySelector('link[rel="icon"]');
+if (favicon) favicon.href = logoMark;
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

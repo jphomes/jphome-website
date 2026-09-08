@@ -9,7 +9,6 @@ const PAGE_TITLES = {
   "/properties": "Properties",
   "/blogs": "Blogs",
   "/blog": "Blogs",
-  "/about": "About",
   "/contact": "Contact",
 };
 

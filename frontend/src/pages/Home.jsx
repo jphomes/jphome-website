@@ -72,7 +72,7 @@ export default function Home() {
         )}
       </section>
 
-      <section className="home-section home-section-muted">
+      <section id="about" className="home-section home-section-muted scroll-mt-24">
         <AboutLegacy />
       </section>
 

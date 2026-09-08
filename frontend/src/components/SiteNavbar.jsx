@@ -9,7 +9,7 @@ import { BRAND } from "../config/brand.js";
 const links = [
   { to: "/properties", label: "Properties" },
   { to: "/blogs", label: "Blogs" },
-  { to: "/about", label: "About" },
+  { to: "/#about", label: "About" },
   { to: "/contact", label: "Contact" },
 ];
 
@@ -41,7 +41,7 @@ export default function SiteNavbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-3">
-          <WhatsAppButton message={buildGeneralWhatsAppMessage()} label="Enquire Now" variant="primary" className="!py-2 !px-5 !text-xs" />
+          <WhatsAppButton message={buildGeneralWhatsAppMessage()} label="Talk to Expert" variant="primary" className="!py-2 !px-5 !text-xs" />
         </div>
 
         <button
