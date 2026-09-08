@@ -12,7 +12,7 @@ const BlogSchema = new mongoose.Schema(
     category: { type: String, default: "Market Insights" },
     tags: [{ type: String }],
     published: { type: Boolean, default: true },
-    author: { type: String, default: "Tom Sondagar" },
+    author: { type: String, default: "Gaurav Sondagar" },
     readTimeMinutes: { type: Number, default: 4 },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   },

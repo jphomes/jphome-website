@@ -28,6 +28,7 @@ export default function App() {
         <Route path="/admin/properties/new" element={<ProtectedRoute><PropertyFormPage /></ProtectedRoute>} />
         <Route path="/admin/properties/:id/edit" element={<ProtectedRoute><PropertyFormPage /></ProtectedRoute>} />
         <Route path="/admin/blogs/new" element={<ProtectedRoute><AddBlog /></ProtectedRoute>} />
+        <Route path="/admin/blogs/:id/edit" element={<ProtectedRoute><AddBlog /></ProtectedRoute>} />
       </Routes>
     );
   }

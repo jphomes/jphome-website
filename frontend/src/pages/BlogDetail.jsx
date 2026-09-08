@@ -44,6 +44,7 @@ export default function BlogDetail() {
     month: "long",
     year: "numeric",
   });
+  const author = blog.author === "Tom Sondagar" ? "Gaurav Sondagar" : blog.author;
   const hasVideo = Boolean(getYoutubeEmbedUrl(blog.youtubeUrl));
 
   return (
@@ -54,7 +55,7 @@ export default function BlogDetail() {
         <p className="text-[10px] font-semibold uppercase text-leaf tracking-wide">{blog.category}</p>
         <h1 className="text-xl md:text-3xl font-semibold text-forest leading-snug mt-2">{blog.title}</h1>
         <p className="text-ink/45 text-xs mt-2">
-          {blog.author} · {date} · {blog.readTimeMinutes} min read
+          {author} · {date} · {blog.readTimeMinutes} min read
         </p>
 
         <BlogMarkdown content={blog.content} />

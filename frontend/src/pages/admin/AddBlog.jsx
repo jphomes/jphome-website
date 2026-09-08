@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import api from "../../api/axios.js";
 import ImageUploader from "../../components/ImageUploader.jsx";
 import AdminShell from "../../components/AdminShell.jsx";
@@ -19,10 +19,36 @@ const initial = {
 
 export default function AddBlog() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditing = Boolean(id);
   const [form, setForm] = useState(initial);
   const [coverImage, setCoverImage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(isEditing);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    setLoading(true);
+    setError("");
+    api
+      .get(`/blogs/admin/${id}`)
+      .then(({ data }) => {
+        setForm({
+          title: data.title || "",
+          excerpt: data.excerpt || "",
+          content: data.content || "",
+          youtubeUrl: data.youtubeUrl || "",
+          category: data.category || "Market Insights",
+          tags: Array.isArray(data.tags) ? data.tags.join(", ") : "",
+          readTimeMinutes: data.readTimeMinutes || 4,
+          published: data.published !== false,
+        });
+        setCoverImage(Array.isArray(data.coverImage) ? data.coverImage[0] || "" : data.coverImage || "");
+      })
+      .catch((err) => setError(err.response?.data?.message || "Could not load blog post."))
+      .finally(() => setLoading(false));
+  }, [id, isEditing]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -56,7 +82,11 @@ export default function AddBlog() {
     };
 
     try {
-      await api.post("/blogs", payload);
+      if (isEditing) {
+        await api.put(`/blogs/${id}`, payload);
+      } else {
+        await api.post("/blogs", payload);
+      }
       navigate("/admin/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Could not save blog post.");
@@ -67,13 +97,14 @@ export default function AddBlog() {
 
   return (
     <AdminShell
-      title="Add journal post"
+      title={isEditing ? "Edit journal post" : "Add journal post"}
       subtitle="Admin studio"
       actions={<Link to="/admin/dashboard" className="admin-back-link">← Dashboard</Link>}
     >
       <div className="admin-blog-layout">
         <form onSubmit={handleSubmit} className="admin-form">
-          <Field label="Title" name="title" value={form.title} onChange={handleChange} required />
+          <fieldset disabled={loading || submitting} className="contents">
+            <Field label="Title" name="title" value={form.title} onChange={handleChange} required />
           <Field
             label="Excerpt (short summary for cards)"
             name="excerpt"
@@ -127,11 +158,12 @@ export default function AddBlog() {
             <input type="checkbox" name="published" checked={form.published} onChange={handleChange} />
             Publish immediately
           </label>
+          </fieldset>
 
           {error && <p className="admin-error">{error}</p>}
 
-          <button type="submit" disabled={submitting} className="admin-btn-primary self-start">
-            {submitting ? "Saving…" : "Publish post"}
+          <button type="submit" disabled={loading || submitting} className="admin-btn-primary self-start">
+            {loading ? "Loading post…" : submitting ? "Saving…" : isEditing ? "Save changes" : "Publish post"}
           </button>
         </form>
 

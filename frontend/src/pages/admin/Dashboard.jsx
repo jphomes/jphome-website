@@ -283,6 +283,7 @@ export default function Dashboard() {
                   </div>
                   <div className="admin-row-actions">
                     <Link to={`/blog/${b.slug}`} target="_blank" className="admin-link-btn">View</Link>
+                    <Link to={`/admin/blogs/${b._id}/edit`} className="admin-link-btn admin-link-btn-strong">Edit</Link>
                     <button type="button" onClick={() => deleteBlog(b._id)} className="admin-danger-btn">
                       Delete
                     </button>

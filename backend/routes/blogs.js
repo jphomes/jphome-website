@@ -41,6 +41,17 @@ router.get("/admin/all", requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/blogs/admin/:id — admin-only edit form data
+router.get("/admin/:id", requireAdmin, async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) return res.status(404).json({ message: "Blog post not found." });
+    res.json(blog);
+  } catch (err) {
+    res.status(400).json({ message: "Could not fetch blog post.", error: err.message });
+  }
+});
+
 // GET /api/blogs/:slug — public detail
 router.get("/:slug", async (req, res) => {
   try {
